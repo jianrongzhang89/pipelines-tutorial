@@ -104,7 +104,7 @@ Run the following command to see the `pipeline` service account:
 $ oc get serviceaccount pipeline
 ```
 
-You will use the simple application during this tutorial, which has a [frontend](https://github.com/openshift/pipelines-vote-ui) and [backend](https://github.com/openshift/pipelines-vote-api)
+You will use the simple application during this tutorial, which has a [frontend](https://github.com/jianrongzhang89/pipelines-vote-ui) and [backend](https://github.com/jianrongzhang89/pipelines-vote-api)
 
 You can also deploy the same applications by applying the artifacts available in k8s directory of the respective repo
 
@@ -129,7 +129,7 @@ Tasks consist of a number of steps that are executed sequentially. Tasks are exe
 Here is an example of a Maven task for building a Maven-based Java application:
 
 ```yaml
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: maven-build
@@ -152,9 +152,9 @@ Note that only the requirement for a git repository is declared on the task and 
 Install the `apply-manifests` and `update-deployment` tasks from the repository using `oc` or `kubectl`, which you will need for creating a pipeline in the next section:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/01_apply_manifest_task.yaml
+$ oc create -f 01_pipeline/01_apply_manifest_task.yaml
 
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/02_update_deployment_task.yaml
+$ oc create -f 01_pipeline/02_update_deployment_task.yaml
 ```
 
 You can take a look at the tasks you created using the [Tekton CLI](https://github.com/tektoncd/cli/releases):
@@ -190,7 +190,7 @@ In this tutorial, you will create a pipeline that takes the source code of the a
 Here is the YAML file that represents the above pipeline:
 
 ```yaml
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: build-and-deploy
@@ -289,7 +289,7 @@ The execution order of task is determined by dependencies that are defined betwe
 Create the pipeline by running the following:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/04_pipeline.yaml
+$ oc create -f 01_pipeline/04_pipeline.yaml
 ```
 
 Alternatively, in the OpenShift Web Console, you can click on the **+** at the top right of the screen while you are in the **pipelines-tutorial** project:
@@ -332,9 +332,9 @@ Lets start a pipeline to build and deploy backend application using `tkn`:
 
 ```bash
 $ tkn pipeline start build-and-deploy \
-    -w name=shared-workspace,volumeClaimTemplateFile=https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/03_persistent_volume_claim.yaml \
+    -w name=shared-workspace,volumeClaimTemplateFile=01_pipeline/03_persistent_volume_claim.yaml \
     -p deployment-name=pipelines-vote-api \
-    -p git-url=https://github.com/openshift/pipelines-vote-api.git \
+    -p git-url=https://github.com/jianrongzhang89/pipelines-vote-api.git \
     -p IMAGE=image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/pipelines-vote-api \
     --use-param-defaults
 
@@ -349,9 +349,9 @@ Similarly, start a pipeline to build and deploy frontend application:
 
 ```bash
 $ tkn pipeline start build-and-deploy \
-    -w name=shared-workspace,volumeClaimTemplateFile=https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/03_persistent_volume_claim.yaml \
+    -w name=shared-workspace,volumeClaimTemplateFile=01_pipeline/03_persistent_volume_claim.yaml \
     -p deployment-name=pipelines-vote-ui \
-    -p git-url=https://github.com/openshift/pipelines-vote-ui.git \
+    -p git-url=https://github.com/jianrongzhang89/pipelines-vote-ui.git \
     -p IMAGE=image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/pipelines-vote-ui \
     --use-param-defaults
 
@@ -437,7 +437,7 @@ A `TriggerTemplate` is a resource which have parameters that can be substituted 
 The definition of our TriggerTemplate is given in `03_triggers/02-template.yaml`.
 
 ```yaml
-apiVersion: triggers.tekton.dev/v1beta1
+apiVersion: triggers.tekton.dev/v1
 kind: TriggerTemplate
 metadata:
   name: vote-app
@@ -452,7 +452,7 @@ spec:
     description: The name of the deployment to be created / patched
 
   resourcetemplates:
-  - apiVersion: tekton.dev/v1beta1
+  - apiVersion: tekton.dev/v1
     kind: PipelineRun
     metadata:
       generateName: build-deploy-$(tt.params.git-repo-name)-
@@ -483,7 +483,7 @@ spec:
 * Run following command to apply Triggertemplate.
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/03_triggers/02_template.yaml
+$ oc create -f 03_triggers/02_template.yaml
 ```
 
 
@@ -493,7 +493,7 @@ TriggerBindings is a map enable you to capture fields from an event and store th
 The definition of our TriggerBinding is given in `03_triggers/01_binding.yaml`.
 
 ```yaml
-apiVersion: triggers.tekton.dev/v1beta1
+apiVersion: triggers.tekton.dev/v1
 kind: TriggerBinding
 metadata:
   name: vote-app
@@ -512,7 +512,7 @@ The exact paths (keys) of parameter we need can be found by examining the event 
 Run following command to apply TriggerBinding.
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/03_triggers/01_binding.yaml
+$ oc create -f 03_triggers/01_binding.yaml
 ```
 
 ####  Trigger
@@ -521,7 +521,7 @@ $ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/ma
 The definition of our Trigger is given in `03_triggers/03_trigger.yaml`.
 
 ```yaml
-apiVersion: triggers.tekton.dev/v1beta1
+apiVersion: triggers.tekton.dev/v1
 kind: Trigger
 metadata:
   name: vote-trigger
@@ -556,7 +556,7 @@ stringData:
 Run following command to apply Trigger.
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/03_triggers/03_trigger.yaml
+$ oc create -f 03_triggers/03_trigger.yaml
 ```
 
 
@@ -570,7 +570,7 @@ The definition for our EventListener can be found in
 `03_triggers/04_event_listener.yaml`.
 
 ```yaml
-apiVersion: triggers.tekton.dev/v1beta1
+apiVersion: triggers.tekton.dev/v1
 kind: EventListener
 metadata:
   name: vote-app
@@ -582,7 +582,7 @@ spec:
 * Run following command to create EventListener.
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/03_triggers/04_event_listener.yaml
+$ oc create -f 03_triggers/04_event_listener.yaml
 ```
 
 >***Note***: EventListener will setup a Service. We need to expose that Service as an OpenShift Route to make it publicly accessible.
@@ -595,7 +595,7 @@ $ oc expose svc el-vote-app
 
 ## Configuring GitHub WebHooks
 
-Now we need to configure webhook-url on [backend](https://github.com/openshift/pipelines-vote-api) and [frontend](https://github.com/openshift/pipelines-vote-ui) source code repositories with the Route we exposed in the previously.
+Now we need to configure webhook-url on [backend](https://github.com/jianrongzhang89/pipelines-vote-api) and [frontend](https://github.com/jianrongzhang89/pipelines-vote-ui) source code repositories with the Route we exposed in the previously.
 
 * Run below command to get webhook-url
 ```bash
@@ -604,7 +604,7 @@ $ echo "URL: $(oc  get route el-vote-app --template='http://{{.spec.host}}')"
 
 >***Note:***
 >
->Fork the [backend](https://github.com/openshift/pipelines-vote-api) and [frontend](https://github.com/openshift/pipelines-vote-ui) source code repositories so that you have sufficient privileges to configure GitHub webhooks.
+>Fork the [backend](https://github.com/jianrongzhang89/pipelines-vote-api) and [frontend](https://github.com/jianrongzhang89/pipelines-vote-ui) source code repositories so that you have sufficient privileges to configure GitHub webhooks.
 
 ### Configure webhook manually
 
@@ -617,7 +617,7 @@ to payload URL > Select Content type as `application/json` > Add secret eg: `123
 
 ![Add webhook](docs/images/add-webhook.png)
 
-- Follow above procedure to configure webhook on [frontend](https://github.com/openshift/pipelines-vote-ui) repo
+- Follow above procedure to configure webhook on [frontend](https://github.com/jianrongzhang89/pipelines-vote-ui) repo
 
 Now we should see a webhook configured on your forked source code repositories (on our
 GitHub Repo, go to Settings>Webhooks).
@@ -628,7 +628,7 @@ GitHub Repo, go to Settings>Webhooks).
 
 #### Trigger pipeline Run
 
-When we perform any push event on the [backend](https://github.com/openshift/pipelines-vote-api) the following should happen.
+When we perform any push event on the [backend](https://github.com/jianrongzhang89/pipelines-vote-api) the following should happen.
 
 1.  The configured webhook in vote-api GitHub repository should push the event payload to our route (exposed EventListener Service).
 
